@@ -19,6 +19,9 @@ local function add_leaves(n, c)
   else
     mem.leaves[n] = c
   end
+  if mem.leaves[n]<1 then
+    mem.leaves[n] = nil
+  end
 end
 
 local function count_leaves()
@@ -30,18 +33,25 @@ local function count_leaves()
   return c
 end
 
+local function is_full(n, c)
+  if mem.leaves[n] and mem.leaves[n]%99 + c < 100 then
+    return false
+  else
+    local stacks = 0
+    for _,i in pairs(mem.leaves) do
+      stacks = stacks + math.ceil(i/99)
+    end
+    return stacks > 23
+  end
+end
+
 local function remove_leaves()
   local L = {}
   for l,_ in pairs(mem.leaves) do
     L[#L+1] = l
   end
   local r = L[1]
-  local c = mem.leaves[r]
-  if c > 1 then 
-    mem.leaves[r] = c-1
-  else
-    mem.leaves[r] = nil
-  end
+  add_leaves(r, -1)
   return r
 end
 
@@ -61,7 +71,7 @@ end
 if event.type =="item" then
   local n = event.item.name
   local c = event.item.count
-  if is_leaves(n) then
+  if is_leaves(n) and not is_full(n,c) then
     add_leaves(n, c)
     return crafter_dir
   else
